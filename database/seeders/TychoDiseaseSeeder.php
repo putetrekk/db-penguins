@@ -17,7 +17,7 @@ class TychoDiseaseSeeder extends Seeder
         $diseases = [];
 
         $row = 0;
-        if (($handle = fopen("database/tycho.csv", "r")) !== FALSE) {
+        if (($handle = fopen("data/tycho.csv", "r")) !== FALSE) {
             while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
                 if ($row++ == 0)
                     continue;

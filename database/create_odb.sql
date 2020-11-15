@@ -5,10 +5,9 @@ use odb;
 create table diseases (
     Id INT PRIMARY KEY AUTO_INCREMENT,
     ConditionSNOMED INT,
-    ConditionName VARCHAR (25),
-    PathogenName VARCHAR (25),
-    PathogenTaxonId INT,
-    Fatalities INT
+    ConditionName VARCHAR (100),
+    PathogenName VARCHAR (100),
+    PathogenTaxonId INT
 );
 
 create table locations (

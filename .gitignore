@@ -4,3 +4,7 @@ Homestead.json
 Homestead.yaml
 .env
 .phpunit.result.cache
+
+# db-penguins
+data/
+tycho.csv

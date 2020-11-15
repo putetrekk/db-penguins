@@ -16,7 +16,8 @@ class DatabaseSeeder extends Seeder
         $this->call([
             TychoDiseaseSeeder::class,
             TychoLocationsSeeder::class,
-            TychoSourceSeeder::class
+            TychoSourceSeeder::class,
+            TychoCasesSeeder::class
         ]);
     }
 }

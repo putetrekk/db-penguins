@@ -24,7 +24,7 @@ class Neo4JDB
         $pass = env('DB_PASSWORD');
 
         $this->client = ClientBuilder::create()
-            ->addConnection('default', "bolt://$user:$pass@$host:$port")
+            ->addConnection('default', "bolt://${user}:${pass}@${host}:${port}")
             ->build();
 
         return $this->client;

@@ -8,28 +8,35 @@ use App\Services\MongoDBService;
 
 class DemoController extends Controller
 {
-    protected $db;
+    protected $neo4j;
     protected $mongo;
 
     public function __construct(Neo4JDB $neo4j, MongoDBService $mongo)
     {
-        $this->db = $neo4j->Client();
+        $this->neo4j = $neo4j->Client();
         $this->mongo = $mongo->Client();
     }
 
     public function show()
     {
-        $result = $this->db->run("
+        $result = $this->neo4j->run("
             MATCH (d:Disease)
             RETURN d.ConditionName as name
         ");
 
-        $diseaseNames = [];
+        $neo4jDiseaseNames = [];
         foreach ($result->records() as $record)
         {
-            $diseaseNames[] = $record->get('name');
+            $neo4jDiseaseNames[] = $record->get('name');
         }
 
-        return View("demo", ["diseases" => $diseaseNames]);
+        $collection = $this->mongo->tycho->diseases;
+        $mongoDiseaseNames = [];
+        foreach ($collection->find() as $record)
+        {
+            $mongoDiseaseNames[] = $record['ConditionName'];
+        }
+
+        return View("demo", ["neo4jDiseases" => $neo4jDiseaseNames, "mongoDiseases" => $mongoDiseaseNames]);
     }
 }

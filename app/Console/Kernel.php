@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Console\Commands\LoadMongoDBCommand;
 use App\Console\Commands\LoadNeo4jCommand;
 use App\Console\Commands\LoadSqlAdbCommand;
 use Illuminate\Console\Scheduling\Schedule;
@@ -16,7 +17,8 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         LoadSqlAdbCommand::class,
-        LoadNeo4jCommand::class
+        LoadNeo4jCommand::class,
+        LoadMongoDBCommand::class
     ];
 
     /**

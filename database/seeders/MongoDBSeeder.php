@@ -21,7 +21,7 @@ class MongoDBSeeder extends Seeder
         ');
 
         $client = (new MongoDBService())->Client();
-
+        $client->dropDatabase('tycho');
         $collection = $client->tycho->diseases;
 
         foreach ($diseases as $disease)

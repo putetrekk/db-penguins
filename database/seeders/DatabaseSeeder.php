@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,6 +14,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
+        // Empty all tables before starting the seeding process
+        DB::table('odb.cases')->delete();
+        DB::table('odb.diseases')->delete();
+        DB::table('odb.locations')->delete();
+        DB::table('odb.sources')->delete();
+
         $this->call([
             TychoDiseaseSeeder::class,
             TychoLocationsSeeder::class,

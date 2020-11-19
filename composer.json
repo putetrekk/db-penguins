@@ -7,7 +7,8 @@
     "require": {
         "php": "^7.3",
         "laravel/lumen-framework": "^8.0",
-        "longitude-one/neo4j-php-client": "1.0.1"
+        "longitude-one/neo4j-php-client": "1.0.1",
+        "mongodb/mongodb": "^1.7"
     },
     "require-dev": {
         "fzaninotto/faker": "^1.9.1",

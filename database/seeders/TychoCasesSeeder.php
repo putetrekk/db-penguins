@@ -63,6 +63,7 @@ class TychoCasesSeeder extends Seeder
         if (count($cases) > 0)
         {
             $this->insertCases($cases);
+            $caseCount += count($cases);
             echo "$caseCount cases added.\n";
         }
     }

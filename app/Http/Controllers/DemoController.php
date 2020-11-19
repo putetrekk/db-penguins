@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 
-use App\Services\Neo4JDB;
+use App\Services\Neo4JDBService;
 use App\Services\MongoDBService;
 
 class DemoController extends Controller
@@ -11,7 +11,7 @@ class DemoController extends Controller
     protected $neo4j;
     protected $mongo;
 
-    public function __construct(Neo4JDB $neo4j, MongoDBService $mongo)
+    public function __construct(Neo4JDBService $neo4j, MongoDBService $mongo)
     {
         $this->neo4j = $neo4j->Client();
         $this->mongo = $mongo->Client();

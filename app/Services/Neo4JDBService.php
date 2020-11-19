@@ -6,7 +6,7 @@ namespace App\Services;
 use GraphAware\Neo4j\Client\ClientBuilder;
 use GraphAware\Neo4j\Client\ClientInterface;
 
-class Neo4JDB
+class Neo4JDBService
 {
     private $client;
 

@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Services\Neo4JDB;
 use Illuminate\Console\Command;
 
 class LoadNeo4jCommand extends Command
@@ -35,8 +34,11 @@ class LoadNeo4jCommand extends Command
      * Execute the console command.
      *
      */
-    public function handle(Neo4JDB $neo4JDB)
+    public function handle()
     {
-        $client = $neo4JDB->Client();
+        $this->call('db:seed', [
+            '--class' => 'Neo4JSeeder',
+            '--force' => true,
+        ]);
     }
 }

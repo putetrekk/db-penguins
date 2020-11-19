@@ -8,13 +8,13 @@ DROP TABLE IF EXISTS adb.loc_dim;
 DROP TABLE IF EXISTS adb.time_dim;
 
 CREATE TABLE time_dim (
-     timeId INT PRIMARY KEY,
+     timeId INT PRIMARY KEY AUTO_INCREMENT,
      year INT NOT NULL UNIQUE
 );
 
 CREATE TABLE  loc_dim (
-   locId INT PRIMARY KEY,
-   locName VARCHAR (25) UNIQUE
+    locId INT PRIMARY KEY AUTO_INCREMENT,
+    locName VARCHAR (25) UNIQUE
 );
 
 CREATE TABLE disease_dim (

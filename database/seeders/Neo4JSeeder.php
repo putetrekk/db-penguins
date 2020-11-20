@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Services\Neo4JDBService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Symfony\Component\Console\Helper\ProgressBar;
 
 class Neo4JSeeder extends Seeder
 {
@@ -29,14 +30,13 @@ class Neo4JSeeder extends Seeder
 
         $this->neo4j = (new Neo4JDBService())->Client();
 
-        $this->output->text("Clearing Neo4J database...");
+        $this->output->text("<comment>Clearing Neo4J database...</comment>");
 
         $this->neo4j->run(
-        /** @lang Cypher */
-            'MATCH (n) DETACH DELETE n
+            /** @lang Cypher */'
+            MATCH (n) DETACH DELETE n
         ');
-
-        $this->output->text("Database emptied");
+        $this->output->text("<info>Done!</info>");
 
         $this->loadDiseases();
         $this->loadLocations();
@@ -45,17 +45,16 @@ class Neo4JSeeder extends Seeder
 
     private function loadDiseases()
     {
-        $this->output->text("Loading diseases...");
+        $this->output->newLine();
+        $this->output->text("<comment>Importing diseases...</comment>");
 
         $diseases = DB::select('
             SELECT ConditionName, PathogenName
             FROM odb.diseases
         ');
 
-        $this->output->text("Diseases loaded!");
-
-        $this->output->text("Importing diseases");
-        $progress = $this->output->createProgressBar(count($diseases));
+        $progress = $this->ProgressBar($this->output, count($diseases));
+        $progress->start();
 
         foreach ($progress->iterate($diseases) as $disease)
         {
@@ -68,22 +67,20 @@ class Neo4JSeeder extends Seeder
                 ]
             );
         }
-        $this->output->text("Diseases imported!");
+        $this->output->newLine();
     }
 
     private function loadLocations()
     {
-        $this->output->text("Loading locations...");
+        $this->output->text("<comment>Importing locations...</comment>");
 
         $locations = DB::select('
             SELECT DISTINCT StateName, StateIso
             FROM odb.locations
         ');
 
-        $this->output->text("Locations loaded!");
-
-        $this->output->text("Importing locations");
-        $progress = $this->output->createProgressBar(count($locations));
+        $progress = $this->ProgressBar($this->output, count($locations));
+        $progress->start();
 
         foreach ($progress->iterate($locations) as $location)
         {
@@ -96,12 +93,12 @@ class Neo4JSeeder extends Seeder
                 ]
             );
         }
-        $this->output->text("Locations imported!");
+        $this->output->newLine();
     }
 
     private function loadCases()
     {
-        $this->output->text("Loading cases...");
+        $this->output->text("<comment>Importing cases...</comment>");
 
         $cases = DB::select('
             SELECT YEAR(c.PeriodEnd) as Year, l.StateIso, d.ConditionName, SUM(CountValue) as Value, 1 as Fatalities
@@ -119,11 +116,9 @@ class Neo4JSeeder extends Seeder
             GROUP BY YEAR(c.PeriodEnd), l.StateIso, d.ConditionName
         ');
 
-        $this->output->text("Cases loaded!");
-
-        $this->output->text("Importing Cases");
-        $progress = $this->output->createProgressBar(count($cases));
-        $progress->setFormat(' %current%/%max% [%bar%] %percent:3s%% Estimated finished in %estimated:-6s%');
+        $progress = $this->ProgressBar($this->output, count($cases));
+        $progress->start();
+        $progress->setFormat('%current%/%max% [%bar%] %percent:3s%% - %estimated:-6s% remaining');
 
         $stack = $this->neo4j->stack();
         foreach ($progress->iterate($cases) as $case)
@@ -137,18 +132,18 @@ class Neo4JSeeder extends Seeder
 
             if ($case->Fatalities) {
                 $stack->push(
-                    /** @lang Cypher */
-                    'MATCH (d:Disease {ConditionName: {ConditionName}}),
-                           (l:Location {StateIso: {StateIso}})
-                     CREATE (d)-[:KILLED]->(c:Count {Value: {Value}, Year: {Year}})-[:IN]->(l)'
+                    /** @lang Cypher */'
+                    MATCH (d:Disease {ConditionName: {ConditionName}}),
+                          (l:Location {StateIso: {StateIso}})
+                    CREATE (d)-[:KILLED]->(c:Count {Value: {Value}, Year: {Year}})-[:IN]->(l)'
                     , $params);
             }
             else {
                 $stack->push(
-                    /** @lang Cypher */
-                    'MATCH (d:Disease {ConditionName: {ConditionName}}),
-                           (l:Location {StateIso: {StateIso}})
-                     CREATE (d)-[:INFECTED]->(c:Count {Value: {Value}, Year: {Year}})-[:IN]->(l)'
+                    /** @lang Cypher */'
+                    MATCH (d:Disease {ConditionName: {ConditionName}}),
+                          (l:Location {StateIso: {StateIso}})
+                    CREATE (d)-[:INFECTED]->(c:Count {Value: {Value}, Year: {Year}})-[:IN]->(l)'
                     , $params);
             }
 
@@ -160,6 +155,19 @@ class Neo4JSeeder extends Seeder
 
         $this->neo4j->runStack($stack);
 
-        $this->output->text("Cases imported!");
+        $this->output->newLine();
+    }
+
+    /**
+     * Create and return a progressbar
+     * @return \Symfony\Component\Console\Helper\ProgressBar
+     */
+    protected static function ProgressBar($output, $max)
+    {
+        $progress = new ProgressBar($output, $max);
+        $progress->setBarCharacter('<info>=</info>');
+        $progress->setEmptyBarCharacter('=');
+        $progress->setProgressCharacter('>');
+        return $progress;
     }
 }

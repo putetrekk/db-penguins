@@ -37,9 +37,9 @@ class SqlAdbSeeder extends Seeder
         $bar->advance(1);
 
         DB::insert('
-            insert into adb.loc_dim (StateName, CountryName)
+            insert into adb.loc_dim (StateName, StateIso, CountryName)
             (
-                select distinct l.StateName, l.CountryName
+                select distinct l.StateName, l.StateIso, l.CountryName
                 from odb.locations l
             )
         ');

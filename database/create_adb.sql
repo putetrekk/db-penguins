@@ -15,6 +15,7 @@ CREATE TABLE time_dim (
 CREATE TABLE  loc_dim (
     locId INT PRIMARY KEY AUTO_INCREMENT,
     StateName VARCHAR (25) UNIQUE,
+    StateIso VARCHAR (5) UNIQUE,
     CountryName VARCHAR (100)
 );
 

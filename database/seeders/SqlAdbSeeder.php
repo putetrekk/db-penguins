@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Console\ConsoleHelper;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -15,7 +16,7 @@ class SqlAdbSeeder extends Seeder
     public function run()
     {
         $output = $this->command->getOutput();
-        $bar = $output->createProgressBar(10);
+        $bar = ConsoleHelper::ProgressBar($output, 10);
 
         DB::table("adb.fact_cases")->delete();
         DB::table("adb.fact_fatalities")->delete();
@@ -78,5 +79,6 @@ class SqlAdbSeeder extends Seeder
         );");
 
         $bar->advance(3);
+        $output->newLine();
     }
 }

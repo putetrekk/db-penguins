@@ -14,11 +14,16 @@ class SqlAdbSeeder extends Seeder
      */
     public function run()
     {
+        $output = $this->command->getOutput();
+        $bar = $output->createProgressBar(10);
+
         DB::table("adb.fact_cases")->delete();
         DB::table("adb.fact_fatalities")->delete();
         DB::table("adb.disease_dim")->delete();
         DB::table("adb.loc_dim")->delete();
         DB::table("adb.time_dim")->delete();
+
+        $bar->advance(1);
 
         DB::insert("
         insert into adb.disease_dim (
@@ -26,12 +31,16 @@ class SqlAdbSeeder extends Seeder
             from odb.diseases d
         );");
 
+        $bar->advance(1);
+
         DB::insert("
         insert into adb.loc_dim
-        (locName) (
-            select distinct l.StateName
+        (StateName, CountryName) (
+            select distinct l.StateName, l.CountryName
             from odb.locations l
         );");
+
+        $bar->advance(1);
 
         DB::insert("
         insert into adb.time_dim
@@ -40,17 +49,21 @@ class SqlAdbSeeder extends Seeder
             from odb.cases c
         );");
 
+        $bar->advance(1);
+
         DB::insert("
         insert into adb.fact_cases
         (timeId, locId, diseaseId, caseCount) (
             select t.timeId, al.locId, c.DiseaseId, SUM(c.CountValue)
             from odb.cases c
                 join odb.locations ol on c.LocationId = ol.Id
-                join adb.loc_dim al on ol.StateName = al.locName
+                join adb.loc_dim al on ol.StateName = al.StateName
                 join adb.time_dim t on YEAR(c.PeriodEnd) = t.year
             where c.Fatalities = false
             group by locId, t.timeId, diseaseId
         );");
+
+        $bar->advance(3);
 
         DB::insert("
         insert into adb.fact_fatalities
@@ -58,10 +71,12 @@ class SqlAdbSeeder extends Seeder
             select t.timeId, al.locId, c.DiseaseId, SUM(c.CountValue)
             from odb.cases c
                 join odb.locations ol on c.LocationId = ol.Id
-                join adb.loc_dim al on ol.StateName = al.locName
+                join adb.loc_dim al on ol.StateName = al.StateName
                 join adb.time_dim t on YEAR(c.PeriodEnd) = t.year
             where c.Fatalities = true
             group by locId, t.timeId, diseaseId
         );");
+
+        $bar->advance(3);
     }
 }

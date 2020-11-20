@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use Database\Seeders\SqlAdbSeeder;
 use Illuminate\Console\Command;
 
 class LoadSqlAdb extends Command
@@ -37,6 +36,9 @@ class LoadSqlAdb extends Command
      */
     public function handle()
     {
-        $this->call(SqlAdbSeeder::class);
+        $this->call('db:seed', [
+            '--class' => 'SqlAdbSeeder',
+            '--force' => true,
+        ]);
     }
 }

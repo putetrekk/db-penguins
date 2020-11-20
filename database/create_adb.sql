@@ -14,7 +14,8 @@ CREATE TABLE time_dim (
 
 CREATE TABLE  loc_dim (
     locId INT PRIMARY KEY AUTO_INCREMENT,
-    locName VARCHAR (25) UNIQUE
+    StateName VARCHAR (25) UNIQUE,
+    CountryName VARCHAR (100)
 );
 
 CREATE TABLE disease_dim (

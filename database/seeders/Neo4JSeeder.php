@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use App\Services\Neo4JDBService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Symfony\Component\Console\Helper\ProgressBar;
+use App\Console\ConsoleHelper;
 
 class Neo4JSeeder extends Seeder
 {
@@ -53,7 +53,7 @@ class Neo4JSeeder extends Seeder
             FROM odb.diseases
         ');
 
-        $progress = $this->ProgressBar($this->output, count($diseases));
+        $progress = ConsoleHelper::ProgressBar($this->output, count($diseases));
         $progress->start();
 
         foreach ($progress->iterate($diseases) as $disease)
@@ -79,7 +79,7 @@ class Neo4JSeeder extends Seeder
             FROM odb.locations
         ');
 
-        $progress = $this->ProgressBar($this->output, count($locations));
+        $progress = ConsoleHelper::ProgressBar($this->output, count($locations));
         $progress->start();
 
         foreach ($progress->iterate($locations) as $location)
@@ -116,7 +116,7 @@ class Neo4JSeeder extends Seeder
             GROUP BY YEAR(c.PeriodEnd), l.StateIso, d.ConditionName
         ');
 
-        $progress = $this->ProgressBar($this->output, count($cases));
+        $progress = ConsoleHelper::ProgressBar($this->output, count($cases));
         $progress->start();
         $progress->setFormat('%current%/%max% [%bar%] %percent:3s%% - %estimated:-6s% remaining');
 
@@ -156,18 +156,5 @@ class Neo4JSeeder extends Seeder
         $this->neo4j->runStack($stack);
 
         $this->output->newLine();
-    }
-
-    /**
-     * Create and return a progressbar
-     * @return \Symfony\Component\Console\Helper\ProgressBar
-     */
-    protected static function ProgressBar($output, $max)
-    {
-        $progress = new ProgressBar($output, $max);
-        $progress->setBarCharacter('<info>=</info>');
-        $progress->setEmptyBarCharacter('=');
-        $progress->setProgressCharacter('>');
-        return $progress;
     }
 }

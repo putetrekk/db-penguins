@@ -19,6 +19,10 @@ $router->get('/', function () use ($router) {
 
 $router->get('demo', 'DemoController@show');
 
+$router->get('interactive-map', function () {
+    return View('map');
+});
+
 $router->group(['prefix' => 'api'], function () use ($router) {
     $router->get('cases/{year}/{diseaseId}[/{locId}]', ['uses' => 'AdbController@cases']);
 });

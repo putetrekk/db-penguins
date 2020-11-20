@@ -118,7 +118,7 @@ class Neo4JSeeder extends Seeder
 
         $progress = ConsoleHelper::ProgressBar($this->output, count($cases));
         $progress->start();
-        $progress->setFormat('%current%/%max% [%bar%] %percent:3s%% - %estimated:-6s% remaining');
+        $progress->setFormat('%current%/%max% [%bar%] %percent:3s%% - %remaining:-6s% remaining');
 
         $stack = $this->neo4j->stack();
         foreach ($progress->iterate($cases) as $case)

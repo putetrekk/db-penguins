@@ -78,15 +78,7 @@
                     },
                     data: [],
                     joinBy: ['hc-key', 'code'],
-                    dataLabels: {
-                        enabled: false,
-                        color: '#FFFFFF',
-                        format: '{point.code}'
-                    },
                     name: 'Count',
-                    tooltip: {
-                        pointFormat: '{point.code}: {point.value}'
-                    }
                 }],
             });
         </script>
@@ -95,8 +87,13 @@
             const yearText = document.getElementsByClassName("selectedYear");
 
             slider.addEventListener('input', (event) => {
-                yearText[0].innerText = Math.floor(event.target.value)
-                fetchCases(yearText[0].innerText, '11')
+                let oldVal = yearText[0].innerText
+                let newVal = Math.floor(event.target.value).toString()
+
+                if (oldVal !== newVal)
+                    fetchCases(yearText[0].innerText, '11')
+
+                yearText[0].innerText = newVal
             });
 
             function fetchCases(year, diseaseId)
@@ -104,8 +101,10 @@
                 fetch('/api/cases/'+year+'/'+diseaseId)
                     .then(response => response.json())
                     .then(data => {
-
                         data = data.map((c) => {
+                            if (c.caseCount <= 0)
+                                return
+
                             return {
                                 code: c.stateIso,
                                 value: c.caseCount,

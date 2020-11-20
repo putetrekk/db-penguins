@@ -26,57 +26,63 @@ class SqlAdbSeeder extends Seeder
 
         $bar->advance(1);
 
-        DB::insert("
-        insert into adb.disease_dim (
-            select d.Id, d.ConditionName
-            from odb.diseases d
-        );");
+        DB::insert('
+            insert into adb.disease_dim
+            (
+                select d.Id, d.ConditionName
+                from odb.diseases d
+            )
+        ');
 
         $bar->advance(1);
 
-        DB::insert("
-        insert into adb.loc_dim
-        (StateName, CountryName) (
-            select distinct l.StateName, l.CountryName
-            from odb.locations l
-        );");
+        DB::insert('
+            insert into adb.loc_dim (StateName, CountryName)
+            (
+                select distinct l.StateName, l.CountryName
+                from odb.locations l
+            )
+        ');
 
         $bar->advance(1);
 
-        DB::insert("
-        insert into adb.time_dim
-        (year) (
-            select distinct YEAR(c.PeriodEnd)
-            from odb.cases c
-        );");
+        DB::insert('
+            insert into adb.time_dim (year)
+            (
+                select distinct YEAR(c.PeriodEnd)
+                from odb.cases c
+            )
+        ');
 
         $bar->advance(1);
 
-        DB::insert("
-        insert into adb.fact_cases
-        (timeId, locId, diseaseId, caseCount) (
-            select t.timeId, al.locId, c.DiseaseId, SUM(c.CountValue)
-            from odb.cases c
+        DB::insert('
+            insert into adb.fact_cases (timeId, locId, diseaseId, caseCount)
+            (
+                select t.timeId, al.locId, c.DiseaseId, SUM(c.CountValue)
+                from odb.cases c
                 join odb.locations ol on c.LocationId = ol.Id
                 join adb.loc_dim al on ol.StateName = al.StateName
                 join adb.time_dim t on YEAR(c.PeriodEnd) = t.year
-            where c.Fatalities = false
-            group by locId, t.timeId, diseaseId
-        );");
+                where c.Fatalities = false
+                group by locId, t.timeId, diseaseId
+            )
+        ');
 
         $bar->advance(3);
 
-        DB::insert("
-        insert into adb.fact_fatalities
-        (timeId, locId, diseaseId, fatalitiesCount) (
-            select t.timeId, al.locId, c.DiseaseId, SUM(c.CountValue)
-            from odb.cases c
+        DB::insert('
+            insert into adb.fact_fatalities (timeId, locId, diseaseId, fatalitiesCount)
+            (
+                select t.timeId, al.locId, c.DiseaseId, SUM(c.CountValue)
+                from odb.cases c
                 join odb.locations ol on c.LocationId = ol.Id
                 join adb.loc_dim al on ol.StateName = al.StateName
                 join adb.time_dim t on YEAR(c.PeriodEnd) = t.year
-            where c.Fatalities = true
-            group by locId, t.timeId, diseaseId
-        );");
+                where c.Fatalities = true
+                group by locId, t.timeId, diseaseId
+            )
+        ');
 
         $bar->advance(3);
         $output->newLine();

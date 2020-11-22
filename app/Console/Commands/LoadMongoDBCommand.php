@@ -36,7 +36,8 @@ class LoadMongoDBCommand extends Command
     public function handle()
     {
         $this->call('db:seed', [
-            '--class' => 'MongoDBSeeder'
+            '--class' => 'MongoDBSeeder',
+            '--force' => true
         ]);
     }
 }

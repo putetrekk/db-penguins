@@ -135,12 +135,14 @@
 
                 colorAxis: {
                     type: 'logarithmic',
+                    min: 0,
+                    max: 1000000,
                     allowNegativeLog: true,
                     stops: [
                         [0, '#f6f6f6'],
-                        [0.33, '#f6e1b9'],
-                        [0.67, '#ff8448'],
-                        [1, '#ff2500']
+                        [0.33, '#ffd6ab'],
+                        [0.67, '#ff2600'],
+                        [1, '#1d0303']
                     ]
                 },
 

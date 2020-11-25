@@ -41,21 +41,21 @@ class MongoDBSeeder extends Seeder
         $this->output->text("<comment>Importing ADB data...</comment>");
 
         $casesAndFatalitiesByYear = DB::select('
-            SELECT y.year, y.StateName, d.ConditionName, y.cases, y.fatalities
-            FROM (SELECT year, DiseaseId, StateName, SUM(cases) as cases, SUM(fatalities) as fatalities
+            SELECT y.year, y.StateIso, d.ConditionName, y.cases, y.fatalities
+            FROM (SELECT year, DiseaseId, StateIso, SUM(cases) as cases, SUM(fatalities) as fatalities
                   FROM
-                     ((SELECT YEAR(PeriodEnd) as year, DiseaseId, l.StateName, SUM(CountValue) as cases, 0 as fatalities
+                     ((SELECT YEAR(PeriodEnd) as year, DiseaseId, l.StateIso, SUM(CountValue) as cases, 0 as fatalities
                       FROM odb.cases
                       JOIN odb.locations l on l.Id = cases.LocationId
                       where Fatalities = 0
-                      GROUP BY YEAR(PeriodEnd), DiseaseId, l.StateName, Fatalities)
+                      GROUP BY YEAR(PeriodEnd), DiseaseId, l.StateIso, Fatalities)
                     UNION
-                     (SELECT YEAR(PeriodEnd) as year, DiseaseId, l.StateName, 0 as cases, SUM(CountValue) as fatalities
+                     (SELECT YEAR(PeriodEnd) as year, DiseaseId, l.StateIso, 0 as cases, SUM(CountValue) as fatalities
                       FROM odb.cases
                       JOIN odb.locations l on l.Id = cases.LocationId
                       where Fatalities = 1
-                      GROUP BY YEAR(PeriodEnd), DiseaseId, l.StateName, Fatalities)) unionTable
-                  GROUP BY year, DiseaseId, StateName) y
+                      GROUP BY YEAR(PeriodEnd), DiseaseId, l.StateIso, Fatalities)) unionTable
+                  GROUP BY year, DiseaseId, StateIso) y
             JOIN odb.diseases d ON d.Id = y.DiseaseId
         ');
 
@@ -66,10 +66,10 @@ class MongoDBSeeder extends Seeder
         {
             $collection->insertOne([
                 'year' => $singleYear->year,
-                'StateName'=> $singleYear->StateName,
+                'StateIso'=> $singleYear->StateIso,
                 'ConditionName' => $singleYear->ConditionName,
-                'cases' => $singleYear->cases,
-                'fatalities' => $singleYear->fatalities
+                'cases' => (int)$singleYear->cases,
+                'fatalities' => (int)$singleYear->fatalities
             ]);
         }
         $this->output->newLine();

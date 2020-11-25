@@ -24,5 +24,5 @@ $router->get('interactive-map', function () {
 });
 
 $router->group(['prefix' => 'api'], function () use ($router) {
-    $router->get('cases/{year}/{diseaseId}[/{locId}]', ['uses' => 'AdbController@cases']);
+    $router->get('cases/{year}/{diseaseName}[/{locId}]', ['uses' => 'AdbController@cases']);
 });

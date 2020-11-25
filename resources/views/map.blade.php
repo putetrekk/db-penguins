@@ -19,20 +19,45 @@
             </div>
         </div>
 
-        <div class="content-wrapper">
-            <div class="content">
-                <div class="slide_container">
-                    <input type="range" min="1880" max="2020" value="1950" step="0.01" class="slider" id="myRange">
-                </div>
-                <p class="selectedYear">1950</p>
+        <div class="content">
+            <div class="slide_container">
+                <input type="range" min="1880" max="2020" value="1950" step="0.01" class="slider" id="myRange">
             </div>
+            <p class="selectedYear">1950</p>
         </div>
 
-        <div class="content-wrapper">
-            <div id="map_container"></div>
+        <div id="map_container"></div>
 
+        <h2 class="is-center">Infection numbers on <span id="diseaseName"></span></h2>
+        <div class="pure-g" style="max-width: 850px; margin: 0 auto;">
+            <div class="pure-u-1 pure-u-sm-1-2 l-box is-center">
+                <div class="select">
+                    <select name="disease" id="diseaseSelect">
+                        <option selected disabled value="None">Choose a disease</option>
+                        <option value="Diphtheria">Diphtheria</option>
+                        <option value="Influenza">Influenza</option>
+                        <option value="Measles">Measles</option>
+                        <option value="Mumps">Mumps</option>
+                        <option value="Pneumonia">Pneumonia</option>
+                        <option value="Scarlet fever">Scarlet fever</option>
+                        <option value="Smallpox">Smallpox</option>
+                        <option value="Pertussis">Pertussis</option>
+                        <option value="Tuberculosis">Tuberculosis</option>
+                        <option value="Typhoid fever">Typhoid fever</option>
+                    </select>
+                </div>
+            </div>
 
-            <h2 class="is-center">Infection numbers on Typhoid fever (1900-1975)</h2>
+            <div class="pure-u-1 pure-u-sm-1-2 l-box is-center">
+                <div class="select">
+                    <select name="db" id="dbSelect">
+                        <option selected disabled value="None">Choose ADB</option>
+                        <option value="SQL">SQL</option>
+                        <option value="MongoDB">MongoDB</option>
+                        <option value="Neo4J">Neo4J</option>
+                    </select>
+                </div>
+            </div>
         </div>
 
         <script src="https://code.highcharts.com/maps/highmaps.js"></script>
@@ -43,7 +68,7 @@
                     map: 'countries/us/us-all',
                     borderWidth: 0,
                     backgroundColor: '#7ac7f1',
-                    maxWidth: 1050,
+                    maxWidth: 850,
                     height: '100%',
                 },
                 credits: {
@@ -62,8 +87,8 @@
                 },
 
                 colorAxis: {
-                    min: 1,
-                    type: 'logarithmic',
+                    min: 0,
+                    type: 'linear',
                     stops: [
                         [0, '#f6f6f6'],
                         [0.33, '#f6e1b9'],
@@ -74,7 +99,7 @@
 
                 series: [{
                     animation: {
-                        duration: 1000
+                        duration: 500
                     },
                     data: [],
                     joinBy: ['hc-key', 'code'],
@@ -83,34 +108,65 @@
             });
         </script>
         <script>
+            const usStates = Highcharts.maps["countries/us/us-all"].features.map(f => {
+                return {
+                    code: f.properties['hc-key'],
+                    value : 0
+                }
+            });
+
             const slider = document.getElementById("myRange");
+            const diseaseSelect = document.getElementById("diseaseSelect")
+            const dbSelect = document.getElementById("dbSelect")
             const yearText = document.getElementsByClassName("selectedYear");
 
             slider.addEventListener('input', (event) => {
-                let oldVal = yearText[0].innerText
-                let newVal = Math.floor(event.target.value).toString()
+                let oldVal = yearText[0].innerText;
+                let newVal = Math.floor(event.target.value).toString();
+                yearText[0].innerText = newVal;
 
                 if (oldVal !== newVal)
-                    fetchCases(yearText[0].innerText, '11')
-
-                yearText[0].innerText = newVal
+                    fetchCases();
             });
 
-            function fetchCases(year, diseaseId)
+            diseaseSelect.addEventListener('change', (event) => {
+                const statesCopy = usStates.map(state => ({code: state.code, value: state.value}));
+                map.series[0].setData(statesCopy, true, 200);
+                setTimeout(() => fetchCases({ duration: 500 }), 200);
+
+                document.getElementById("diseaseName").textContent = event.target.value;
+            });
+
+            dbSelect.addEventListener('change', (event) => {
+                const statesCopy = usStates.map(state => ({code: state.code, value: state.value}));
+                map.series[0].setData(statesCopy, true, 200);
+                setTimeout(() => fetchCases({ duration: 500 }), 200);
+            });
+
+            function fetchCases(animation)
             {
-                fetch('/api/cases/'+year+'/'+diseaseId)
+                const hm_animation = animation ?? { duration: 50}
+
+                const year = Math.floor(slider.value);
+                const disease = diseaseSelect.value;
+                const adb = dbSelect.value;
+
+                if (disease === 'None')
+                    return;
+
+                fetch(`/api/cases/${year}/${disease}?adb=${adb}`)
                     .then(response => response.json())
                     .then(data => {
-                        data = data.map((c) => {
-                            if (c.caseCount <= 0)
-                                return
+                        newData = usStates.map((state) => {
+                            newValue = data?.find(d => d.stateIso === state.code)?.caseCount ?? 0;
 
                             return {
-                                code: c.stateIso,
-                                value: c.caseCount,
+                                code: state.code,
+                                value: newValue,
                             }
                         });
-                        map.series[0].setData(data);
+
+                        map.series[0].setData(newData, true, hm_animation);
                     });
             }
         </script>

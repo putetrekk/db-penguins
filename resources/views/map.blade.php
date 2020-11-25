@@ -172,6 +172,7 @@
 
             const playButton = document.getElementById("playButton");
             let isPlaying = false;
+            let timeoutHandle;
 
             playButton.addEventListener('click', event => {
                 isPlaying = !isPlaying;
@@ -180,19 +181,33 @@
                 icon.innerHTML = isPlaying
                     ? '<i class="fa fa-pause" aria-hidden="true"></i>'
                     : '<i class="fa fa-play" aria-hidden="true"></i>';
+
+                if (isPlaying)
+                    timeoutHandle = setTimeout(next, 500);
+                else
+                    clearTimeout(timeoutHandle);
             });
 
-            setInterval(() => {
-                if (!isPlaying || diseaseSelect.value === 'None' || dbSelect.value === 'None')
+            function next() {
+                if (diseaseSelect.value === 'None' || dbSelect.value === 'None')
                     return;
 
                 const nextYear = parseInt(slider.value) + 1;
 
+                if (nextYear > parseInt(slider.getAttribute('max')))
+                {
+                    playButton.dispatchEvent(new Event('click'));
+                    return;
+                }
+
                 fetchCases(nextYear, {duration: 500}).then(() => {
                     yearText[0].innerText = nextYear;
                     slider.value = nextYear;
+
+                    if (isPlaying)
+                        timeoutHandle = setTimeout(next, 500);
                 });
-            }, 500)
+            }
 
             slider.addEventListener('input', (event) => {
                 let newVal = Math.floor(event.target.value).toString();
@@ -222,7 +237,7 @@
             function fetchCases(year, animation)
             {
                 year ??= Math.floor(slider.value);
-                animation ??= { duration: 50}
+                animation ??= { duration: 50 }
 
                 const disease = diseaseSelect.value;
                 const adb = dbSelect.value;

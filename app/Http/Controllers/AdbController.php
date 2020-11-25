@@ -21,6 +21,8 @@ class AdbController extends Controller
 
     public function cases(Request $request, int $year, string $diseaseName)
     {
+        $diseaseName = urldecode($diseaseName);
+
         $adb = $request->input('adb', 'sql');
 
         switch (strtolower($adb))

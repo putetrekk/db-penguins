@@ -19,11 +19,15 @@
             </div>
         </div>
 
-        <div class="content">
-            <div class="slide_container">
-                <input type="range" min="1880" max="2020" value="1950" step="0.01" class="slider" id="myRange">
-            </div>
-            <p class="selectedYear">1950</p>
+        <div class="slide_container">
+            <input type="range" min="1880" max="2020" value="1900" step="1" class="slider" id="myRange">
+        </div>
+
+        <div class="is-center">
+            <button type="submit" id="playButton" class="playButton pure-button">
+                <span id="playButtonIcon"><i class="fa fa-play" aria-hidden="true"></i></span>
+                <span class="selectedYear">1900</span>
+            </button>
         </div>
 
         <div id="map_container"></div>
@@ -63,6 +67,49 @@
         <script src="https://code.highcharts.com/maps/highmaps.js"></script>
         <script src="https://code.highcharts.com/mapdata/countries/us/us-all.js"></script>
         <script>
+            /**
+             * Custom Axis extension to allow emulation of negative values on a logarithmic
+             * color axis. Note that the scale is not mathematically correct, as a true
+             * logarithmic axis never reaches or crosses zero.
+             *
+             * SOURCE: https://jsfiddle.net/gh/get/library/pure/highcharts/highcharts/tree/master/samples/highcharts/coloraxis/logarithmic-with-emulate-negative-values/
+             */
+            (function (H) {
+                H.addEvent(H.Axis, 'afterInit', function () {
+                    const logarithmic = this.logarithmic;
+
+                    if (logarithmic && this.options.allowNegativeLog) {
+
+                        // Avoid errors on negative numbers on a log axis
+                        this.positiveValuesOnly = false;
+
+                        // Override the converter functions
+                        logarithmic.log2lin = num => {
+                            const isNegative = num < 0;
+
+                            let adjustedNum = Math.abs(num);
+
+                            if (adjustedNum < 10) {
+                                adjustedNum += (10 - adjustedNum) / 10;
+                            }
+
+                            const result = Math.log(adjustedNum) / Math.LN10;
+                            return isNegative ? -result : result;
+                        };
+
+                        logarithmic.lin2log = num => {
+                            const isNegative = num < 0;
+
+                            let result = Math.pow(10, Math.abs(num));
+                            if (result < 10) {
+                                result = (10 * (result - 1)) / (10 - 1);
+                            }
+                            return isNegative ? -result : result;
+                        };
+                    }
+                });
+            }(Highcharts));
+
             let map = Highcharts.mapChart('map_container', {
                 chart: {
                     map: 'countries/us/us-all',
@@ -87,8 +134,8 @@
                 },
 
                 colorAxis: {
-                    min: 0,
-                    type: 'linear',
+                    type: 'logarithmic',
+                    allowNegativeLog: true,
                     stops: [
                         [0, '#f6f6f6'],
                         [0.33, '#f6e1b9'],
@@ -120,19 +167,45 @@
             const dbSelect = document.getElementById("dbSelect")
             const yearText = document.getElementsByClassName("selectedYear");
 
-            slider.addEventListener('input', (event) => {
-                let oldVal = yearText[0].innerText;
-                let newVal = Math.floor(event.target.value).toString();
-                yearText[0].innerText = newVal;
+            const playButton = document.getElementById("playButton");
+            let isPlaying = false;
 
-                if (oldVal !== newVal)
-                    fetchCases();
+            playButton.addEventListener('click', event => {
+                isPlaying = !isPlaying;
+
+                const icon = document.getElementById("playButtonIcon");
+                icon.innerHTML = isPlaying
+                    ? '<i class="fa fa-pause" aria-hidden="true"></i>'
+                    : '<i class="fa fa-play" aria-hidden="true"></i>';
+            });
+
+            setInterval(() => {
+                if (!isPlaying || diseaseSelect.value === 'None' || dbSelect.value === 'None')
+                    return;
+
+                const nextYear = parseInt(slider.value) + 1;
+
+                fetchCases(nextYear, {duration: 500}).then(() => {
+                    yearText[0].innerText = nextYear;
+                    slider.value = nextYear;
+                });
+            }, 500)
+
+            slider.addEventListener('input', (event) => {
+                let newVal = Math.floor(event.target.value).toString();
+
+                if (!isPlaying)
+                {
+                    fetchCases().then(() => {
+                        yearText[0].innerText = newVal;
+                    });
+                }
             });
 
             diseaseSelect.addEventListener('change', (event) => {
                 const statesCopy = usStates.map(state => ({code: state.code, value: state.value}));
                 map.series[0].setData(statesCopy, true, 200);
-                setTimeout(() => fetchCases({ duration: 500 }), 200);
+                setTimeout(() => fetchCases(slider.value, { duration: 500 }), 200);
 
                 document.getElementById("diseaseName").textContent = event.target.value;
             });
@@ -140,21 +213,21 @@
             dbSelect.addEventListener('change', (event) => {
                 const statesCopy = usStates.map(state => ({code: state.code, value: state.value}));
                 map.series[0].setData(statesCopy, true, 200);
-                setTimeout(() => fetchCases({ duration: 500 }), 200);
+                setTimeout(() => fetchCases(slider.value, { duration: 500 }), 200);
             });
 
-            function fetchCases(animation)
+            function fetchCases(year, animation)
             {
-                const hm_animation = animation ?? { duration: 50}
+                year ??= Math.floor(slider.value);
+                animation ??= { duration: 50}
 
-                const year = Math.floor(slider.value);
                 const disease = diseaseSelect.value;
                 const adb = dbSelect.value;
 
-                if (disease === 'None')
+                if (disease === 'None' || adb === 'None')
                     return;
 
-                fetch(`/api/cases/${year}/${disease}?adb=${adb}`)
+                return fetch(`/api/cases/${year}/${disease}?adb=${adb}`)
                     .then(response => response.json())
                     .then(data => {
                         newData = usStates.map((state) => {
@@ -166,7 +239,7 @@
                             }
                         });
 
-                        map.series[0].setData(newData, true, hm_animation);
+                        map.series[0].setData(newData, true, animation);
                     });
             }
         </script>

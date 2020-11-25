@@ -194,8 +194,6 @@ label {
  * -- CURRENT YEAR DISPLAY --
  */
 .selectedYear {
-    font-size: 30px;
-    color: #fff;
     text-align: center;
 }
 
@@ -252,4 +250,18 @@ select {
 /* Transition */
 .select:hover::after {
     color: #f39c12;
+}
+
+/*
+ * -- PLAY/PAUSE BUTTON --
+ */
+.playButton {
+    font-size: 150%;
+    background: #ffffff;
+    color: #3e5b76;
+    border-radius: 50px;
+}
+
+.playButton span {
+    padding: 0 5px;
 }

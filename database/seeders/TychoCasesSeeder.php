@@ -39,6 +39,10 @@ class TychoCasesSeeder extends Seeder
                 if ($row++ == 0)
                     continue; // Skip header
 
+                $partOfCumulativeSeries = (bool)$data[13];
+                if ($partOfCumulativeSeries)
+                    continue;
+
                 $periodStart = $data[11];
                 $periodEnd = $data[12];
                 $fatalities = $data[4];
@@ -50,7 +54,7 @@ class TychoCasesSeeder extends Seeder
 
                 $cases[] = [$periodStart, $periodEnd, $fatalities, $count, $diseaseId, $locationId, $sourceId];
 
-                if (count($cases) >= 10000)
+                if (count($cases) >= 50000)
                 {
                     $this->insertCases($cases);
                     $caseCount += count($cases);

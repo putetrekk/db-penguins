@@ -42,10 +42,6 @@ label {
     background: #7ac7f1;
 }
 
-.content-wrapper {
-
-}
-
 /*
  * -- LAYOUT STYLES --
  * These are some useful classes which I will need
@@ -112,9 +108,9 @@ label {
 }
 
 /*
- * -- MAP STYLES
+ * -- HIGHCHART/MAPS STYLES --
  */
-#map_container {
+#map_container, #graph_container {
     /*height: 100%;*/
     min-width: 310px;
     max-width: 850px;

@@ -23,6 +23,11 @@ $router->get('interactive-map', function () {
     return View('map');
 });
 
+$router->get('graph-history', function () {
+    return View('history');
+});
+
 $router->group(['prefix' => 'api'], function () use ($router) {
-    $router->get('cases/{year}/{diseaseName}[/{locId}]', ['uses' => 'AdbController@cases']);
+    $router->get('cases/{year}/{diseaseName}', ['uses' => 'MapController@cases']);
+    $router->get('history/{diseaseName}/{stateIso}', ['uses' => 'HistoryController@history']);
 });

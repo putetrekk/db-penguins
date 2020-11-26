@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 
 use Illuminate\Http\Request;
 
-class AdbController extends Controller
+class MapController extends Controller
 {
     protected $neo4j;
     protected $mongo;

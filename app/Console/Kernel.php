@@ -29,6 +29,10 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        //
+        $schedule->command(LoadSqlAdbCommand::class)->dailyAt("00:00");
+
+        $schedule->command(LoadMongoDBCommand::class)->dailyAt("00:30");
+
+        $schedule->command(LoadNeo4jCommand::class)->dailyAt("01:00");
     }
 }

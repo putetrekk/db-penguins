@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="description" content="A layout example that shows off a responsive product landing page.">
+        <meta name="description" content="Database management project in IKT446 ICT Seminar 4 Database Management at University of Agder (UiA), Grimstad 2020.">
         <link rel="icon" type="image/png" href="/favicon.png">
         <title>Interactive Tycho Disease Dataset on US States</title>
         <link rel="stylesheet" href="https://unpkg.com/purecss@2.0.3/build/pure-min.css">
@@ -38,16 +38,9 @@
                 <div class="select">
                     <select name="disease" id="diseaseSelect">
                         <option selected disabled value="None">Choose a disease</option>
-                        <option value="Diphtheria">Diphtheria</option>
-                        <option value="Influenza">Influenza</option>
-                        <option value="Measles">Measles</option>
-                        <option value="Mumps">Mumps</option>
-                        <option value="Pneumonia">Pneumonia</option>
-                        <option value="Scarlet fever">Scarlet fever</option>
-                        <option value="Smallpox">Smallpox</option>
-                        <option value="Pertussis">Pertussis</option>
-                        <option value="Tuberculosis">Tuberculosis</option>
-                        <option value="Typhoid fever">Typhoid fever</option>
+                        @foreach($diseases as $disease)
+                            <option value="{{$disease}}">{{$disease}}</option>
+                        @endforeach
                     </select>
                 </div>
             </div>

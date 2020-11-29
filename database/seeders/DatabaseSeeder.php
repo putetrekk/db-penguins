@@ -14,17 +14,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        // Empty all tables before starting the seeding process
-        DB::table('odb.cases')->delete();
-        DB::table('odb.diseases')->delete();
-        DB::table('odb.locations')->delete();
-        DB::table('odb.sources')->delete();
-
         $this->call([
-            TychoDiseaseSeeder::class,
-            TychoLocationsSeeder::class,
-            TychoSourceSeeder::class,
-            TychoCasesSeeder::class
+            //
         ]);
     }
 }

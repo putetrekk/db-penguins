@@ -1,6 +1,10 @@
-drop schema odb;
-create schema odb;
-use odb;
+CREATE SCHEMA IF NOT EXISTS odb;
+USE odb;
+
+DROP TABLE IF EXISTS cases;
+DROP TABLE IF EXISTS diseases;
+DROP TABLE IF EXISTS locations;
+DROP TABLE IF EXISTS sources;
 
 create table diseases (
     Id INT PRIMARY KEY AUTO_INCREMENT,

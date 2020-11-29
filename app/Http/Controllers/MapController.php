@@ -19,6 +19,13 @@ class MapController extends Controller
         $this->mongo = $mongo->Client();
     }
 
+    public function show()
+    {
+        $diseases = DB::select('SELECT ConditionName FROM odb.diseases');
+        $diseaseNames = array_map(function ($d) { return $d->ConditionName; }, $diseases);
+        return view('map', ['diseases' => $diseaseNames]);
+    }
+
     public function cases(Request $request, int $year, string $diseaseName)
     {
         $diseaseName = urldecode($diseaseName);

@@ -19,6 +19,13 @@ class HistoryController extends Controller
         $this->mongo = $mongo->Client();
     }
 
+    public function show()
+    {
+        $diseases = DB::select('SELECT ConditionName FROM odb.diseases');
+        $diseaseNames = array_map(function ($d) { return $d->ConditionName; }, $diseases);
+        return view('history', ['diseases' => $diseaseNames]);
+    }
+
     public function history(Request $request, string $diseaseName, string $stateIso)
     {
         $diseaseName = urldecode($diseaseName);

@@ -19,13 +19,9 @@ $router->get('/', function () use ($router) {
 
 $router->get('demo', 'DemoController@show');
 
-$router->get('interactive-map', function () {
-    return View('map');
-});
+$router->get('interactive-map', 'MapController@show');
 
-$router->get('graph-history', function () {
-    return View('history');
-});
+$router->get('graph-history', 'HistoryController@show');
 
 $router->group(['prefix' => 'api'], function () use ($router) {
     $router->get('cases/{year}/{diseaseName}', ['uses' => 'MapController@cases']);

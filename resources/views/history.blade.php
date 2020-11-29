@@ -8,7 +8,7 @@
         <title>Interactive Tycho Disease Dataset on US States</title>
         <link rel="stylesheet" href="https://unpkg.com/purecss@2.0.3/build/pure-min.css">
         <link rel="stylesheet" href="https://unpkg.com/purecss@2.0.3/build/grids-responsive-min.css">
-        <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css">
+        <script src="https://kit.fontawesome.com/a19accb0ec.js" crossorigin="anonymous"></script>
         <link rel="stylesheet" href="styles.css">
 
         <!-- <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/base-min.css"> -->
@@ -29,6 +29,14 @@
                     <option value="Neo4J">Neo4J</option>
                 </select>
             </div>
+
+            <br />
+            <br />
+
+            <label class="switch">
+                <input type="checkbox" id="deathSwitch">
+                <span class="toggle round"></span>
+            </label>
         </div>
 
         <div id="graph_container"></div>
@@ -67,7 +75,7 @@
                 chart: {
                     type: 'spline',
                     borderWidth: 0,
-                    backgroundColor: '#7ac7f1',
+                    backgroundColor: 'transparent',
                     maxWidth: 850,
                     height: 400,
                 },
@@ -108,6 +116,7 @@
             });
         </script>
         <script>
+            const deathSwitch = document.getElementById("deathSwitch")
             const diseaseSelect = document.getElementById("diseaseSelect")
             const stateSelect = document.getElementById("stateSelect");
             const dbSelect = document.getElementById("dbSelect")
@@ -187,6 +196,11 @@
                 fetchCases();
             });
 
+            deathSwitch.addEventListener('change', (event) => {
+                document.body.classList.toggle('death');
+                fetchCases();
+            })
+
             function fetchCases(animation)
             {
                 animation ??= { duration: 50 }
@@ -194,20 +208,24 @@
                 const disease = diseaseSelect.value;
                 const state = stateSelect.value;
                 const adb = dbSelect.value;
+                const fatalities = deathSwitch.checked ? 1 : 0;
 
                 if (disease === 'None' || state === 'None' || adb === 'None')
                     return;
 
-                return fetch(`/api/history/${disease}/${state}?adb=${adb}`)
+                return fetch(`/api/history/${disease}/${state}?adb=${adb}&fatalities=${fatalities}`)
                     .then(response => response.json())
                     .then(data => {
                         data = data.sort((a, b) => { return a.year - b.year });
 
-                        const newData = data.map((obj) => [Date.UTC(obj.year, 0), obj.caseCount]);
+                        const newData = data.map((obj) => [Date.UTC(obj.year, 0), obj.count]);
                         const stateName = usStates.find(s => s[0] === state)[1];
 
-                        chart.series[0].setName(`Cases of ${disease} in ${stateName}`)
                         chart.series[0].setData(newData, true);
+                        chart.series[0].setName(`Number of ${disease} ${fatalities ? 'deaths' : 'cases'} in ${stateName}`)
+                        chart.yAxis[0].axisTitle.attr({
+                            text:  `Number of ${fatalities ? 'deaths' : 'cases'}`
+                        });
                     });
             }
         </script>

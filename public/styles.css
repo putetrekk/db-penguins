@@ -40,6 +40,11 @@ label {
 
 .map-background {
     background: #7ac7f1;
+    transition: background-color ease 0.5s;
+}
+
+.map-background.death {
+    background: #1c1c1c;
 }
 
 /*
@@ -260,4 +265,79 @@ select {
 
 .playButton span {
     padding: 0 5px;
+}
+
+/*
+ * -- CUSTOM SWITCH STYLES --
+ */
+
+/* The switch - the box around the slider */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* The slider */
+.toggle {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #324f68;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+.toggle:before {
+    font-family: FontAwesome;
+    font-weight: 900;
+    line-height: 26px;
+    color: #e00000;
+    content: "\f004";
+
+    position: absolute;
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+input:checked + .toggle {
+    background-color: #262628;
+}
+
+input:focus + .toggle {
+    box-shadow: 0 0 1px #3f4f5a;
+}
+
+input:checked + .toggle:before {
+    -webkit-transform: translateX(26px);
+    -ms-transform: translateX(26px);
+    transform: translateX(26px);
+
+    content: "\f714";
+    color: #000000;
+}
+
+/* Rounded toggle */
+.toggle.round {
+    border-radius: 34px;
+}
+
+.toggle.round:before {
+    border-radius: 50%;
 }

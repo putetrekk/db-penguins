@@ -29,21 +29,22 @@ class HistoryController extends Controller
     public function history(Request $request, string $diseaseName, string $stateIso)
     {
         $diseaseName = urldecode($diseaseName);
+        $fatalities = (bool)$request->input('fatalities', '0');
 
         $adb = $request->input('adb', 'sql');
 
         switch (strtolower($adb))
         {
             case 'sql':
-                $result = $this->sqlImplementation($diseaseName, $stateIso);
+                $result = $this->sqlImplementation($diseaseName, $stateIso, $fatalities);
                 break;
 
             case 'neo4j':
-                $result = $this->neo4jImplementation($diseaseName, $stateIso);
+                $result = $this->neo4jImplementation($diseaseName, $stateIso, $fatalities);
                 break;
 
             case 'mongodb':
-                $result = $this->mongodbImplementation($diseaseName, $stateIso);
+                $result = $this->mongodbImplementation($diseaseName, $stateIso, $fatalities);
                 break;
 
             default:
@@ -53,7 +54,7 @@ class HistoryController extends Controller
         return response()->json($result);
     }
 
-    private function mongodbImplementation(string $diseaseName, string $stateIso)
+    private function mongodbImplementation(string $diseaseName, string $stateIso, bool $fatalities)
     {
         $collection = $this->mongo->tycho->fact;
 
@@ -73,20 +74,21 @@ class HistoryController extends Controller
         {
             $result[] = [
                 'year' => $document['year'],
-                'caseCount' => $document['cases'],
-                'deathCount' => $document['fatalities'],
+                'count' => $fatalities ? $document['fatalities'] : $document['cases'],
             ];
         }
 
         return $result;
     }
 
-    private function neo4jImplementation(string $diseaseName, string $stateIso)
+    private function neo4jImplementation(string $diseaseName, string $stateIso, bool $fatalities)
     {
+        $relation = $fatalities ? ':KILLED' : ':INFECTED';
+
         if (strtolower($stateIso) === 'usa') {
             $result = $this->neo4j->run(
                 /* @lang Cypher */ "
-                MATCH (d:Disease)-[:INFECTED]->(c:Count)
+                MATCH (d:Disease)-[${relation}]->(c:Count)
                  WHERE d.ConditionName = {diseaseName}
                  WITH c.Year AS year, sum(c.Value) AS caseCount
                 RETURN year, caseCount",
@@ -96,7 +98,7 @@ class HistoryController extends Controller
         else {
             $result = $this->neo4j->run(
                 /* @lang Cypher */"
-                MATCH (d:Disease)-[:INFECTED]->(c:Count)-[:IN]->(l:Location)
+                MATCH (d:Disease)-[${relation}]->(c:Count)-[:IN]->(l:Location)
                  WHERE d.ConditionName = {diseaseName}
                    AND l.StateIso = {stateIso}
                 RETURN c.Year as year, c.Value as caseCount",
@@ -107,34 +109,37 @@ class HistoryController extends Controller
         return array_map(function ($record) {
             return [
                 'year' => $record->get('year'),
-                'caseCount' => $record->get('caseCount'),
+                'count' => $record->get('caseCount'),
             ];
         }, $result->records());
     }
 
-    private function sqlImplementation(string $diseaseName, string $stateIso)
+    private function sqlImplementation(string $diseaseName, string $stateIso, $fatalities)
     {
+        $fact_table = $fatalities ? 'adb.fact_fatalities' : 'adb.fact_cases';
+        $count_column = $fatalities ? 'fact.fatalitiesCount' : 'fact.caseCount';
+
         if (strtolower($stateIso) === 'usa') {
-            return DB::select('
-                SELECT td.year, CAST(SUM(fc.caseCount) AS UNSIGNED) as caseCount
-                FROM adb.fact_cases fc
-                JOIN adb.time_dim td on td.timeId = fc.timeId
-                JOIN adb.loc_dim ld on ld.locId = fc.locId
-                JOIN adb.disease_dim dd on dd.diseaseId = fc.diseaseId
+            return DB::select("
+                SELECT td.year, CAST(SUM(${count_column}) AS UNSIGNED) as count
+                FROM ${fact_table} fact
+                JOIN adb.time_dim td on td.timeId = fact.timeId
+                JOIN adb.loc_dim ld on ld.locId = fact.locId
+                JOIN adb.disease_dim dd on dd.diseaseId = fact.diseaseId
                 WHERE dd.diseaseName = :diseaseName
-                GROUP BY td.year',
+                GROUP BY td.year",
                 ['diseaseName' => $diseaseName]
             );
         }
 
-        return DB::select('
-            SELECT td.year, fc.caseCount
-            FROM adb.fact_cases fc
-            JOIN adb.time_dim td on td.timeId = fc.timeId
-            JOIN adb.loc_dim ld on ld.locId = fc.locId
-            JOIN adb.disease_dim dd on dd.diseaseId = fc.diseaseId
+        return DB::select("
+            SELECT td.year, ${count_column} as count
+            FROM ${fact_table} fact
+            JOIN adb.time_dim td on td.timeId = fact.timeId
+            JOIN adb.loc_dim ld on ld.locId = fact.locId
+            JOIN adb.disease_dim dd on dd.diseaseId = fact.diseaseId
             WHERE ld.StateIso = :stateIso
-              AND dd.diseaseName = :diseaseName',
+              AND dd.diseaseName = :diseaseName",
             ['diseaseName' => $diseaseName, 'stateIso' => strtoupper($stateIso)]
         );
     }

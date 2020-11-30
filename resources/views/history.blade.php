@@ -214,11 +214,11 @@
                         const newData = data.map((obj) => [Date.UTC(obj.year, 0), obj.count]);
                         const stateName = usStates.find(s => s[0] === state)[1];
 
-                        chart.series[0].setData(newData, true);
-                        chart.series[0].setName(`Number of ${disease} ${fatalities ? 'deaths' : 'cases'} in ${stateName}`)
                         chart.yAxis[0].axisTitle.attr({
                             text:  `Number of ${fatalities ? 'deaths' : 'cases'}`
                         });
+                        chart.series[0].setName(`Number of ${disease} ${fatalities ? 'deaths' : 'cases'} in ${stateName}`)
+                        chart.series[0].setData(newData, true);
                     });
             }
         </script>

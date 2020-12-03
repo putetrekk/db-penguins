@@ -14,10 +14,8 @@
 */
 
 $router->get('/', function () use ($router) {
-    return $router->app->version();
+    return view('home');
 });
-
-$router->get('demo', 'DemoController@show');
 
 $router->get('interactive-map', 'MapController@show');
 

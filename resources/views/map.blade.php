@@ -16,7 +16,8 @@
     <body class="map-background">
         <div class="header">
             <div class="home-menu pure-menu pure-menu-horizontal">
-                <a class="pure-menu-heading" href="">Interactive Tycho Disease Dataset on US States</a>
+                <a class="pure-menu-heading" href="#">Map view</a>
+                <a class="pure-menu-heading" href="/graph-history">Graph view</a>
             </div>
         </div>
 

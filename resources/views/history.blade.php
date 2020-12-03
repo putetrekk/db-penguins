@@ -16,7 +16,8 @@
     <body class="map-background">
         <div class="header">
             <div class="home-menu pure-menu pure-menu-horizontal">
-                <a class="pure-menu-heading" href="">GRAPH OF DISEASE CASES IN US STATES</a>
+                <a class="pure-menu-heading" href="/interactive-map">Map view</a>
+                <a class="pure-menu-heading" href="#">Graph view</a>
             </div>
         </div>
 

@@ -88,6 +88,7 @@ class LoadCSVCommand extends Command
         $lineNumber = 0;
         $caseCount = 0;
         if (($handle = fopen($file, "r")) !== FALSE) {
+            $cases = [];
             while (($row = fgetcsv($handle, 1000, ",")) !== FALSE) {
                 if ($lineNumber++ == 0)
                     continue;
